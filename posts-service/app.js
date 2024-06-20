@@ -4,6 +4,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/route-post');
 const eventRoutes = require('./routes/route-events')
+const forumRoutes = require('./routes/route-forums');
+const commentRoutes = require('./routes/route-coments');
+
 const cors = require('cors');
 
 const app = express();
@@ -22,9 +25,12 @@ app.use(cors()); // Conexión
 //Rutas user
 app.use('/api/v1/posts', userRoutes);
 app.use('/api/v1/events', eventRoutes);
+app.use('/api/v1/forums', forumRoutes);
+app.use('/api/v1/comments', commentRoutes);
+
 
 
 const PORT = 5020;
 app.listen(PORT, () => {
-    console.log(`Servidor POSTS / EVENTOS corriendo en el puerto ${PORT}`);
+    console.log(`Servidor POSTS / EVENTOS /FOROS corriendo en el puerto ${PORT}`);
 });

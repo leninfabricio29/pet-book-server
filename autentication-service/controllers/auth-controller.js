@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const jwt = require('jsonwebtoken')
+const twilio = require('twilio');
+
 
 
 exports.login = async (req, res) => {
@@ -34,10 +36,10 @@ exports.login = async (req, res) => {
 
 
 
-// Array para almacenar tokens inválidos
-let blacklistedTokens = [];
 
 // Endpoint para hacer logout
+let blacklistedTokens = [];
+
 exports.logout = (req, res) => {
     const token = req.headers.authorization;
 
@@ -63,7 +65,6 @@ exports.verifyToken = (req, res, next) => {
 
 
 
-const twilio = require('twilio');
 
 // Configuración de Twilio
 const accountSid = 'AC5cba3e1f8308a8bad87e2504f2cbc841';
@@ -100,7 +101,7 @@ exports.resetPassword = async (req, res) => {
         await axios.post(`http://localhost:5000/api/v1/users/${user.email}/updatePassword/`, {password: newPassword});
 
         // Enviar el mensaje de texto con la nueva contraseña
-        const phoneNumber = req.body.phone; // Asumiendo que el número de teléfono está en el campo 'phone'
+        const phoneNumber = req.body.phone; 
         if (!phoneNumber) {
             return res.status(400).json({ message: 'El usuario no tiene un número de teléfono registrado.' });
         }
@@ -108,7 +109,7 @@ exports.resetPassword = async (req, res) => {
         const fullPhoneNumber = `+593${phoneNumber}`
         await client.messages.create({
             body: `Hola ${user.name}, tu nueva contraseña es: ${newPassword}. Por favor, cámbiala una vez que inicies sesión.`,
-            from: '+16619274480', // Reemplaza con tu número de teléfono de Twilio
+            from: '+16619274480', 
             to: fullPhoneNumber
         });
         console.log("Mesaje de texto enviado a:", fullPhoneNumber )

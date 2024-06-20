@@ -1,0 +1,86 @@
+// CommentController.js
+const Comment = require('../models/comment');
+const Forum = require('../models/forum');
+const axios = require('axios');
+
+// Crear un nuevo comentario
+// Controlador para crear un nuevo comentario en un foro
+const createComment = async (req, res) => {
+    const { content, forumId } = req.body;
+    const userId = req.body.createdBy; // Suponiendo que el usuario actual está autenticado y su ID está disponible en req.user
+
+    try {
+        // Verificar si el foro al que se quiere añadir el comentario existe y está activo
+        const forum = await Forum.findOne({ _id: forumId, status: 'active' });
+        if (!forum) {
+            return res.status(404).json({ error: 'Forum not found or inactive' });
+        }
+
+        // Crear el nuevo comentario
+        const newComment = new Comment({
+            content,
+            createdBy: userId,
+            forum: forumId
+        });
+
+        // Guardar el comentario en la base de datos
+        const savedComment = await newComment.save();
+
+        // Agregar el comentario al array de respuestas (answers) del foro
+        forum.answers.push({ commentId: savedComment._id });
+        await forum.save();
+
+        res.status(201).json(savedComment); // Devolver el comentario creado
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+
+
+async function getCommentById(req, res) {
+    const { id } = req.params; // ID del comentario a buscar
+
+    try {
+        // Buscar el comentario en la base de datos local
+        const comment = await Comment.findById(id);
+
+        if (!comment) {
+            return res.status(404).json({ error: 'Comentario no encontrado' });
+        }
+
+        // Obtener datos del perfil desde la API externa
+        const profileId = comment.createdBy; // Suponiendo que createdBy es directamente el ID del usuario
+
+        const profileResponse = await axios.get(`http://localhost:5000/api/v1/profiles/${profileId}`);
+
+
+        // Combinar los datos del comentario con los datos del perfil
+        const responseData = {
+            comment: {
+                _id: comment._id,
+                content: comment.content,
+                createdBy: comment.createdBy, // Aquí podrías incluir más detalles si los necesitas
+                forum: comment.forum,
+                post: comment.post,
+                createdAt: comment.createdAt,
+                updatedAt: comment.updatedAt
+            },
+            profileData: profileResponse.data // Datos completos del perfil desde la API
+        };
+
+        res.json(responseData);
+    } catch (error) {
+        console.error('Error al obtener el comentario:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+}
+
+
+
+module.exports = {
+    createComment,
+    getCommentById
+
+};
