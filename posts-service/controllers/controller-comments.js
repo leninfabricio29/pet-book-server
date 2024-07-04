@@ -1,12 +1,15 @@
 // CommentController.js
 const Comment = require('../models/comment');
+const Post = require('../models/post');
 const Forum = require('../models/forum');
+
 const axios = require('axios');
 
 // Crear un nuevo comentario
 // Controlador para crear un nuevo comentario en un foro
 const createComment = async (req, res) => {
     const { content, forumId } = req.body;
+
     const userId = req.body.createdBy; // Suponiendo que el usuario actual está autenticado y su ID está disponible en req.user
 
     try {
@@ -78,9 +81,51 @@ async function getCommentById(req, res) {
 }
 
 
+const createCommentPost = async (req, res) => {
+    const { content, postId } = req.body;
+
+
+    // Suponiendo que el usuario actual está autenticado y su ID está disponible en req.user
+    const userId = req.body.createdBy;
+
+
+    try {
+        // Verificar si la publicación a la que se quiere añadir el comentario existe y está activa
+        const post = await Post.findOne({ _id: postId });
+
+        if (!post) {
+            return res.status(404).json({ error: 'No se encuentra la publicación' });
+        }
+
+        // Crear el nuevo comentario
+        const newComment = new Comment({
+            content,
+            createdBy: userId,
+            post: postId
+        });
+
+        // Guardar el comentario en la base de datos
+        const savedComment = await newComment.save();
+
+        // Agregar el comentario al array de respuestas (comments) de la publicación
+        post.comments.push(savedComment._id);
+        post.amount_comments += 1;
+        await post.save();
+
+        res.status(201).json(savedComment); // Devolver el comentario creado
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error del servidor' });
+    }
+}
+
+
+
 
 module.exports = {
     createComment,
-    getCommentById
+    getCommentById,
+    createCommentPost,
+    
 
 };

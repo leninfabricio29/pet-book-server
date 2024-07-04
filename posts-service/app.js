@@ -6,6 +6,8 @@ const userRoutes = require('./routes/route-post');
 const eventRoutes = require('./routes/route-events')
 const forumRoutes = require('./routes/route-forums');
 const commentRoutes = require('./routes/route-coments');
+const reactionRoutes = require('./routes/route-reactions');
+const notificationRoutes = require('./routes/route-notifications');
 
 const cors = require('cors');
 
@@ -27,6 +29,8 @@ app.use('/api/v1/posts', userRoutes);
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/forums', forumRoutes);
 app.use('/api/v1/comments', commentRoutes);
+app.use('/api/v1/reactions', reactionRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 
 

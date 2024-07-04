@@ -28,6 +28,14 @@ const postSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+
+    comments: [{
+        commentId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comment'
+        }
+    }],
+
     reward: {
         type: Number,
         default: 0
@@ -41,7 +49,11 @@ const postSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Pet',
         required: true
-    }
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
 });
 
 // Índice geoespacial para la búsqueda por ubicación

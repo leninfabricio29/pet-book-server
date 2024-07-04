@@ -1,6 +1,7 @@
 const cloudinary = require('../config/cloudinary');
 const Profile = require('../models/profile');
 const User = require('../models/users'); // Asegúrate de importar el modelo User
+const axios = require('axios')
 
 const createProfile = async (req, res) => {
     try {
@@ -271,25 +272,35 @@ const getFollowingProfile = async (req, res) => {
 // Controlador para actualizar los detalles de un perfil existente
 const updateProfile = async (req, res) => {
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['number_phone', 'photo_profile', 'photo_cover', 'word_description', 'description'];
+    const allowedUpdates = ['notifications'];
     const isValidOperation = updates.every(update => allowedUpdates.includes(update));
 
     if (!isValidOperation) {
-        return res.status(400).send({ error: 'Invalid updates!' });
+        return res.status(400).send({ error: 'Actualizaciones inválidas' });
     }
 
     try {
-        const profile = await Profile.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const profile = await Profile.findById(req.params.id);
 
         if (!profile) {
-            return res.status(404).send();
+            return res.status(404).send({ error: 'Perfil no encontrado' });
         }
+
+        // Actualizar solo las notificaciones en el perfil
+        if (req.body.notifications && Array.isArray(req.body.notifications)) {
+            profile.notifications.push(...req.body.notifications);
+        }
+
+        await profile.save();
 
         res.send(profile);
     } catch (error) {
+        console.error('Error al actualizar el perfil:', error);
         res.status(400).send(error);
     }
 };
+
+
 
 // Controlador para eliminar un perfil
 const deleteProfile = async (req, res) => {

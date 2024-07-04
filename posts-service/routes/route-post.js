@@ -1,5 +1,3 @@
-// routes/postRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/controller-post');
@@ -14,6 +12,12 @@ router.patch('/:id', postController.updatePost);
 router.delete('/:id', postController.deletePost);
 
 // Ruta para obtener una publicación por su ID
-router.get('/allPosts/:id', postController.getPostByUserId);
+router.get('/:id', postController.getPostById);
+
+// Ruta para obtener todas las publicaciones de un usuario por su ID
+router.get('/user/:id', postController.getPostByUserId);
+
+// Ruta para obtener todas las publicaciones
+router.get('/', postController.getPost);
 
 module.exports = router;

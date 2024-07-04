@@ -40,7 +40,10 @@ const profileSchema = new mongoose.Schema({
     following: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Profile'
-    }]
+    }],
+
+    notifications: [{type: mongoose.Schema.Types.ObjectId,
+        ref: 'Notification'}]
 });
 
 const Profile = mongoose.model('Profile', profileSchema);

@@ -40,7 +40,6 @@ const userSchema = new mongoose.Schema({
         default: false
     }
 });
-
 // Método de instancia para actualizar la contraseña
 userSchema.methods.updatePassword = async function(newPassword) {
     const salt = await bcrypt.genSalt(10);

@@ -31,11 +31,7 @@ const createPost = async (req, res) => {
 
 
 
-
-
-
-
-    const getPostByUserId = async (req, res) => {
+const getPostByUserId = async (req, res) => {
         try {
             const ownerId = req.params.id;
     
@@ -99,9 +95,75 @@ const deletePost = async (req, res) => {
     }
 };
 
+
+//Promesas asincronas
+const getPost = async (req, res) => {
+    try {
+        const posts = await Post.find();
+
+        if (!posts) {
+            return res.status(404).send();
+        }
+
+        const enrichedPosts = await Promise.all(posts.map(async post => {
+            const ownerResponse = await fetch(`http://localhost:5000/api/v1/profiles/${post.owner}`);
+            const petResponse = await fetch(`http://localhost:5010/api/v1/pets/${post.pet}`);
+
+            if (!ownerResponse.ok || !petResponse.ok) {
+                throw new Error('Failed to fetch owner or pet data');
+            }
+
+            const ownerData = await ownerResponse.json();
+            const petData = await petResponse.json();
+
+
+            return {
+                profilePhoto: ownerData.profile.photo_profile_url,
+                firstName: ownerData.user.name,
+                lastName: ownerData.user.last_name,
+                petPhoto: petData.pet.photo_url,
+                numberPhone: ownerData.profile.number_phone,
+                ...post.toObject()
+            };
+        }));
+
+        res.send(enrichedPosts);
+
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
+
+
+const getPostById = async (req, res) => {
+    const postId = req.params.id; // Corrección del parámetro
+
+    try {
+        const post = await Post.findById(postId).populate({
+            path: 'comments.commentId',
+            model: 'Comment'
+        });
+
+        
+        if (!post) {
+            return res.status(404).json({ error: 'Post no encontrado' });
+        }
+        res.status(200).json(post);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+
+
+
+
 module.exports = {
     createPost,
     updatePost,
     deletePost,
     getPostByUserId, 
+    getPost,
+    getPostById,
 };
