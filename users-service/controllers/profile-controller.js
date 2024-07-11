@@ -74,6 +74,21 @@ const createProfile = async (req, res) => {
 };
 
 
+const getProfiles = async (req, res) => {
+    try {
+        // Obtener todos los perfiles
+        const profiles = await Profile.find({});
+        
+        res.status(200).json(profiles);
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching profiles' });
+    
+    }
+}
+
+
 
 
 // Controlador para obtener un perfil por su ID
@@ -330,5 +345,6 @@ module.exports = {
     getProfileId,
     getFollowerProfile,
     getFollowingProfile,
+    getProfiles
     
 };

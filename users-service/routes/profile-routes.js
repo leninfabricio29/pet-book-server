@@ -9,6 +9,8 @@ const upload = require('../middleware/upload');
 // Ruta para crear un nuevo perfil
 router.post('/new', upload, profileController.createProfile);
 
+router.get('/all', profileController.getProfiles)
+
 router.put('/update/:id', profileController.updateProfile);
 
 // Ruta para obtener perfil y usuario por id (usuario)

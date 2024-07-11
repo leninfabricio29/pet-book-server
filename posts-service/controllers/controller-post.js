@@ -39,7 +39,7 @@ const getPostByUserId = async (req, res) => {
             const posts = await Post.find({ owner: ownerId });
     
             // Obtener la mascota del propietario
-            const petResponse = await fetch(`http://localhost:5010/api/v1/pets/${posts.pet}`);
+            const petResponse = await fetch(`http://localhost:3010/api/v1/pets/${posts.pet}`);
             const petData = await petResponse.json();
     
             // Construir el objeto de respuesta con los posts y la mascota
@@ -106,8 +106,8 @@ const getPost = async (req, res) => {
         }
 
         const enrichedPosts = await Promise.all(posts.map(async post => {
-            const ownerResponse = await fetch(`http://localhost:5000/api/v1/profiles/${post.owner}`);
-            const petResponse = await fetch(`http://localhost:5010/api/v1/pets/${post.pet}`);
+            const ownerResponse = await fetch(`http://localhost:3010/api/v1/profiles/${post.owner}`);
+            const petResponse = await fetch(`http://localhost:3010/api/v1/pets/${post.pet}`);
 
             if (!ownerResponse.ok || !petResponse.ok) {
                 throw new Error('Failed to fetch owner or pet data');
@@ -130,13 +130,14 @@ const getPost = async (req, res) => {
         res.send(enrichedPosts);
 
     } catch (error) {
-        res.status(500).send(error);
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching posts' });
     }
 }
 
 
 const getPostById = async (req, res) => {
-    const postId = req.params.id; // Corrección del parámetro
+    const postId = req.params.id;
 
     try {
         const post = await Post.findById(postId).populate({
@@ -144,15 +145,37 @@ const getPostById = async (req, res) => {
             model: 'Comment'
         });
 
-        
         if (!post) {
-            return res.status(404).json({ error: 'Post no encontrado' });
+            return res.status(404).json({ error: 'Post not found' });
         }
-        res.status(200).json(post);
+
+        const ownerResponse = await fetch(`http://localhost:3010/api/v1/profiles/${post.owner}`);
+        const petResponse = await fetch(`http://localhost:3010/api/v1/pets/${post.pet}`);
+
+        if (!ownerResponse.ok || !petResponse.ok) {
+            throw new Error('Failed to fetch owner or pet data');
+        }
+
+        const ownerData = await ownerResponse.json();
+        const petData = await petResponse.json();
+
+        const postDetails = {
+            profilePhoto: ownerData.profile.photo_profile_url,
+            firstName: ownerData.user.name,
+            lastName: ownerData.user.last_name,
+            petPhoto: petData.pet.photo_url,
+            numberPhone: ownerData.profile.number_phone,
+            ...post.toObject()
+        };
+
+        res.json(postDetails);
+
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching post' });
     }
 };
+
 
 
 

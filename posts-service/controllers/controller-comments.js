@@ -30,6 +30,11 @@ const createComment = async (req, res) => {
         const savedComment = await newComment.save();
 
         // Agregar el comentario al array de respuestas (answers) del foro
+
+
+
+
+        
         forum.answers.push({ commentId: savedComment._id });
         await forum.save();
 
@@ -106,6 +111,48 @@ const createCommentPost = async (req, res) => {
 
         // Guardar el comentario en la base de datos
         const savedComment = await newComment.save();
+
+
+        // Crear una nueva notificación
+    const newNotification = {
+        type: 'comment',
+        emiter_id: userId,
+        receiver_id: post.owner,
+        post_id: post._id
+      };
+  
+      // Enviar la nueva notificación al microservicio de notificaciones
+      const notificationResponse = await axios.post('http://localhost:5020/api/v1/notifications/new', {
+        notifications: [newNotification]
+      });
+      const savedNotifications = notificationResponse.data;
+  
+      // Obtener el perfil del propietario de la publicación
+      const profileResponse = await axios.get(`http://localhost:5000/api/v1/profiles/${post.owner}`);
+      const perfil = profileResponse.data.profile;
+  
+      if (!perfil) {
+        return res.status(404).json({ error: 'Perfil no encontrado' });
+      }
+  
+      // Asegurarse de que perfil.notifications sea un array antes de push
+      if (!perfil.notifications || !Array.isArray(perfil.notifications)) {
+        perfil.notifications = [];
+      }
+  
+      // Añadir las notificaciones guardadas al perfil
+      perfil.notifications.push(...savedNotifications);
+  
+      // Enviar una solicitud para actualizar perfil en la base de datos
+      try {
+        const updateResponse = await axios.put(`http://localhost:5000/api/v1/profiles/update/${perfil._id}`, {
+          notifications: savedNotifications
+        });
+        console.log('Perfil actualizado:', updateResponse.data);
+      } catch (error) {
+        console.error('Error al actualizar perfil:', error);
+        return res.status(500).json({ error: 'Error al actualizar perfil' });
+      }
 
         // Agregar el comentario al array de respuestas (comments) de la publicación
         post.comments.push(savedComment._id);

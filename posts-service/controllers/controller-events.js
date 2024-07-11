@@ -7,7 +7,7 @@ const createEvent = async (req, res) => {
 
     try {
         // Verificar si el usuario existe en el servicio de usuarios
-        const userResponse = await axios.get(`http://localhost:5000/api/v1/users/${userId}`);
+        const userResponse = await axios.get(`http://localhost:3010/api/v1/users/${userId}`);
         if (!userResponse.data) {
             return res.status(404).send({ error: 'Usuario no encontrado' });
         }
@@ -39,7 +39,8 @@ const getEvents = async (req, res) => {
         
         res.status(200).json(events);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching posts' });
     }
 };
 
@@ -93,10 +94,39 @@ const getEventsByUserId = async (req, res) => {
 };
 
 
+const getUsersInEvents = async (req, res) => {
+    const eventId = req.params.id;
+
+    try {
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ message: 'Evento no encontrado' });
+        }
+
+        const users = event.users_saveds;
+
+        // Make requests to the profiles endpoint for each user ID
+        const profileRequests = users.map(userId => axios.get(`http://localhost:3010/api/v1/profiles/${userId}`));
+
+        // Wait for all requests to complete
+        const profileResponses = await Promise.all(profileRequests);
+
+        // Extract the data from each response
+        const profiles = profileResponses.map(response => response.data);
+
+        res.status(200).json(profiles);
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 
 module.exports = {
     createEvent,
     getEvents,
     saveEvents,
     getEventsByUserId,
+    getUsersInEvents
 };

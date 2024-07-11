@@ -1,6 +1,5 @@
 const Reaction = require('../models/reaction');
 const Post = require('../models/post');
-const Notification = require('../models/notification');
 const axios = require('axios');
 
 // Controlador para crear una nueva reacción

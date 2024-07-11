@@ -9,7 +9,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const response = await axios.get(`http://localhost:5000/api/v1/users/email/${email}`);
+        const response = await axios.get(`http://localhost:3010/api/v1/users/email/${email}`);
         const user = response.data;
 
         if (!user) {
