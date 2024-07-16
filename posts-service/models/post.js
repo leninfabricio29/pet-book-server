@@ -12,12 +12,12 @@ const postSchema = new mongoose.Schema({
     location: {
         type: {
             type: String,
-            required: true,
+            required: false,
             default: 'Point'
         },
         coordinates: {
             type: [Number], // [longitud, latitud]
-            required: true
+            required: false
         }
     },
     amount_reactions: {
@@ -48,11 +48,17 @@ const postSchema = new mongoose.Schema({
     pet: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Pet',
-        required: true
+        required: false
+
     },
     createdAt: {
         type: Date,
         default: Date.now
+    },
+
+    photo_post_url: {
+        type: String,
+        required: false,
     },
 });
 

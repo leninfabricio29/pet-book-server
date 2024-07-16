@@ -1,4 +1,5 @@
 // servicio-usuario/app.js
+require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -8,6 +9,7 @@ const forumRoutes = require('./routes/route-forums');
 const commentRoutes = require('./routes/route-coments'); // Corregido typo: de 'route-coments' a 'route-comments'
 const reactionRoutes = require('./routes/route-reactions');
 const notificationRoutes = require('./routes/route-notifications');
+
 
 const cors = require('cors');
 

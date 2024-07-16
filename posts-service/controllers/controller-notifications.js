@@ -60,7 +60,6 @@ const getNotificationByProfileId = async (req, res) => {
 
         // Llamar a la API para obtener el perfil
         const profileResponse = await axios.get(`http://localhost:5000/api/v1/profiles/${owner}`);
-
         const profile = profileResponse.data.profile;
 
         if (!profile) {
@@ -86,6 +85,7 @@ const getNotificationByProfileId = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener notificaciones por perfil' });
     }
 };
+
 
 
 

@@ -9,19 +9,26 @@ const createForum = async (req, res) => {
         // Guardar el nuevo foro en la base de datos
         await newForum.save();
 
+        
+
         // Obtener todos los perfiles
         const profilesResponse = await axios.get('http://localhost:3010/api/v1/profiles/all');
-        console.log(profilesResponse.data); // Imprimir la estructura de la respuesta
-        const profiles = profilesResponse.data; // Asegurarse de que estás accediendo a la propiedad correcta
+        const profiles = profilesResponse.data;
 
         if (!profiles || profiles.length === 0) {
             return res.status(404).json({ error: 'No se encontraron perfiles' });
         }
 
-        // Crear notificaciones para cada perfil
-        const notifications = profiles.map(profile => ({
+        // Filtrar los perfiles para excluir al creador del foro
+        const filteredProfiles = profiles.filter(profile => profile.user !== createdBy);
+
+        console.log(filteredProfiles)
+
+
+        // Crear notificaciones para los perfiles filtrados
+        const notifications = filteredProfiles.map(profile => ({
             type: 'foro',
-            emiter_id: createdBy,
+            emiter_id: createdBy,  // ID del creador del foro
             receiver_id: profile._id,
             post_id: newForum._id
         }));
@@ -32,22 +39,25 @@ const createForum = async (req, res) => {
         });
         const savedNotifications = notificationResponse.data;
 
-        // Actualizar cada perfil con las nuevas notificaciones
-        for (const profile of profiles) {
-            // Asegurarse de que perfil.notifications sea un array antes de push
-            if (!profile.notifications || !Array.isArray(profile.notifications)) {
-                profile.notifications = [];
+        // Limpiar las notificaciones en cada perfil
+        for (const profile of filteredProfiles) {
+            profile.notifications = [];
+        }
+
+        // Agregar las nuevas notificaciones a cada perfil
+        for (const profile of filteredProfiles) {
+            const newNotification = savedNotifications.find(n => n.receiver_id === profile._id);
+            if (newNotification) {
+                profile.notifications.push(newNotification);
             }
+        }
 
-            // Añadir las notificaciones guardadas al perfil
-            profile.notifications.push(...savedNotifications.filter(n => n.receiver_id === profile._id));
-
-            // Enviar una solicitud para actualizar perfil en la base de datos
+        // Actualizar cada perfil en la base de datos
+        for (const profile of filteredProfiles) {
             try {
-                const updateResponse = await axios.put(`http://localhost:3010/api/v1/profiles/update/${profile._id}`, {
+                await axios.put(`http://localhost:3010/api/v1/profiles/update/${profile._id}`, {
                     notifications: profile.notifications
                 });
-                console.log('Perfil actualizado:', updateResponse.data);
             } catch (error) {
                 console.error('Error al actualizar perfil:', error);
                 return res.status(500).json({ error: 'Error al actualizar perfil' });
@@ -59,6 +69,8 @@ const createForum = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+
 
 
 // Obtener todos los foros
