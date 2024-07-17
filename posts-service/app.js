@@ -34,7 +34,7 @@ app.use('/api/v1/comments', commentRoutes);
 app.use('/api/v1/reactions', reactionRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 
-const PORT = 5020;
+const PORT = 6030;
 app.listen(PORT, () => {
     console.log(`Servidor POSTS / EVENTOS / FOROS corriendo en el puerto ${PORT}`);
 });

@@ -59,7 +59,7 @@ const getNotificationByProfileId = async (req, res) => {
         const { owner } = req.body;
 
         // Llamar a la API para obtener el perfil
-        const profileResponse = await axios.get(`http://localhost:5000/api/v1/profiles/${owner}`);
+        const profileResponse = await axios.get(`http://localhost:6010/api/v1/profiles/${owner}`);
         const profile = profileResponse.data.profile;
 
         if (!profile) {

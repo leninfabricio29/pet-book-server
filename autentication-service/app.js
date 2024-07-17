@@ -21,7 +21,7 @@ app.use(cors())
 //Rutas user
 app.use('/api/v1/auth', authRoutes);
 
-const PORT = 5005;
+const PORT = 6000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

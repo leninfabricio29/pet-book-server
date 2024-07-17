@@ -87,8 +87,10 @@ exports.resetPassword = async (req, res) => {
 
     try {
         // Buscar el usuario por correo electrónico
-        const response = await axios.get(`http://localhost:5000/api/v1/users/email/${email}`);
+        const response = await axios.get(`http://localhost:3010/api/v1/users/email/${email}`);
         const user = response.data;
+
+        console.log(user)
 
         if (!user) {
             return res.status(404).json({ message: 'No existe usuario registrado con este correo electrónico.' });
@@ -97,14 +99,17 @@ exports.resetPassword = async (req, res) => {
         // Generar una nueva contraseña aleatoria
         const newPassword = generateRandomPassword(6);
 
-        // Actualizar la contraseña del usuario en la base de datos
-        await axios.post(`http://localhost:5000/api/v1/users/${user.email}/updatePassword/`, {password: newPassword});
+        console.log("Nueva contraseña", newPassword)
 
-        // Enviar el mensaje de texto con la nueva contraseña
+        // Actualizar la contraseña del usuario en la base de datos
+        await axios.post(`http://localhost:3010/api/v1/users/${user.email}/updatePassword/`, {password: newPassword});
+
         const phoneNumber = req.body.phone; 
         if (!phoneNumber) {
             return res.status(400).json({ message: 'El usuario no tiene un número de teléfono registrado.' });
         }
+
+        console.log("Numero de telefonia", phoneNumber)
 
         const fullPhoneNumber = `+593${phoneNumber}`
         await client.messages.create({

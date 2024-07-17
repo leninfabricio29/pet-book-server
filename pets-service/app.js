@@ -22,7 +22,7 @@ app.use(cors()); // Conexión
 //Rutas pets
 app.use('/api/v1/pets', petRoutes);
 
-const PORT = 5010;
+const PORT = 6020;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

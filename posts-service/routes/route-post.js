@@ -6,6 +6,9 @@ const postController = require('../controllers/controller-post');
 // Ruta para crear una nueva publicación
 router.post('/new', upload, postController.createPost);
 
+router.get('/list', postController.getPostsAll);
+
+
 // Ruta para actualizar los detalles de una publicación existente
 router.patch('/:id', postController.updatePost);
 
@@ -20,5 +23,7 @@ router.get('/user/:id', postController.getPostByUserId);
 
 // Ruta para obtener todas las publicaciones
 router.get('/', postController.getPost);
+
+
 
 module.exports = router;

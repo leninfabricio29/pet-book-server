@@ -22,7 +22,6 @@ const createForum = async (req, res) => {
         // Filtrar los perfiles para excluir al creador del foro
         const filteredProfiles = profiles.filter(profile => profile.user !== createdBy);
 
-        console.log(filteredProfiles)
 
 
         // Crear notificaciones para los perfiles filtrados

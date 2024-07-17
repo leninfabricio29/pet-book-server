@@ -76,7 +76,7 @@ const createPet = async (req, res) => {
 //Controlador para obtener una nueva mascota
 const getAllPets = async (req, res) => {
     try {
-        const pets = await Pet.find({});
+        const pets = await Pet.find();
         res.send(pets);
     } catch (error) {
         res.status(500).send(error);
@@ -93,7 +93,7 @@ const getPetsByUser = async (req, res) => {
         }
 
         // Realizar una solicitud al microservicio de usuarios para verificar el usuario
-        const userResponse = await axios.get(`http://localhost:5000/api/v1/users/${ownerId}`);
+        const userResponse = await axios.get(`http://localhost:6010/api/v1/users/${ownerId}`);
 
         // Verificar si el usuario existe
         if (userResponse.status !== 200 || !userResponse.data) {

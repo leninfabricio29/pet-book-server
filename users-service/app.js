@@ -29,7 +29,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/profiles', profileRoutes);
 
 
-const PORT = 5000;
+const PORT = 6010;
 app.listen(PORT, () => {
     console.log(`Servidor microservicio Usuarios/perfiles corriendo en el puerto ${PORT}`);
 });

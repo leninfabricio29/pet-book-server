@@ -61,7 +61,7 @@ async function getCommentById(req, res) {
         // Obtener datos del perfil desde la API externa
         const profileId = comment.createdBy; // Suponiendo que createdBy es directamente el ID del usuario
 
-        const profileResponse = await axios.get(`http://localhost:5000/api/v1/profiles/${profileId}`);
+        const profileResponse = await axios.get(`http://localhost:6010/api/v1/profiles/${profileId}`);
 
 
         // Combinar los datos del comentario con los datos del perfil
@@ -122,13 +122,13 @@ const createCommentPost = async (req, res) => {
       };
   
       // Enviar la nueva notificación al microservicio de notificaciones
-      const notificationResponse = await axios.post('http://localhost:5020/api/v1/notifications/new', {
+      const notificationResponse = await axios.post('http://localhost:3010/api/v1/notifications/new', {
         notifications: [newNotification]
       });
       const savedNotifications = notificationResponse.data;
   
       // Obtener el perfil del propietario de la publicación
-      const profileResponse = await axios.get(`http://localhost:5000/api/v1/profiles/${post.owner}`);
+      const profileResponse = await axios.get(`http://localhost:3010/api/v1/profiles/${post.owner}`);
       const perfil = profileResponse.data.profile;
   
       if (!perfil) {
@@ -145,7 +145,7 @@ const createCommentPost = async (req, res) => {
   
       // Enviar una solicitud para actualizar perfil en la base de datos
       try {
-        const updateResponse = await axios.put(`http://localhost:5000/api/v1/profiles/update/${perfil._id}`, {
+        const updateResponse = await axios.put(`http://localhost:3010/api/v1/profiles/update/${perfil._id}`, {
           notifications: savedNotifications
         });
         console.log('Perfil actualizado:', updateResponse.data);

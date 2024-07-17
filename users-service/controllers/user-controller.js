@@ -114,7 +114,7 @@ exports.updatePassword = async (req, res) => {
 
     try {
         // Busca el usuario por correo electrónico
-        const response = await axios.get(`http://localhost:5000/api/v1/users/email/${email}`);
+        const response = await axios.get(`http://localhost:3010/api/v1/users/email/${email}`);
         const userData = response.data;
 
         if (!userData) {

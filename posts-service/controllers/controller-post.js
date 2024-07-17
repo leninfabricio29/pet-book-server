@@ -250,9 +250,21 @@ const getPost = async (req, res) => {
 };
 
 
+const getPostsAll = async (req, res) => {
+    try {
+      const posts = await Post.find({});
+      res.send(posts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      res.status(500).send('Error fetching posts');
+    }
+  };
+
 
 const getPostById = async (req, res) => {
     const postId = req.params.id;
+
+    
 
     try {
         const post = await Post.findById(postId).populate({
@@ -260,25 +272,37 @@ const getPostById = async (req, res) => {
             model: 'Comment'
         });
 
+
+
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });
         }
 
+        console.log(post.photo_post_url);
+
         const ownerResponse = await fetch(`http://localhost:3010/api/v1/profiles/${post.owner}`);
         const petResponse = await fetch(`http://localhost:3010/api/v1/pets/${post.pet}`);
 
-        if (!ownerResponse.ok || !petResponse.ok) {
-            throw new Error('Failed to fetch owner or pet data');
+        
+        if(post.photo_post_url === ""){
+            console.log("Esta publicacion es de tipo Adopcion o perdida")
+        }else{
+            console.log("Esta publicacion es de tipo Avistamiento")
+
         }
 
         const ownerData = await ownerResponse.json();
         const petData = await petResponse.json();
 
+        const petPhoto = post.photo_post_url === "" ? petData.pet.photo_url : post.photo_post_url;
+
+        console.log(petPhoto)
+
         const postDetails = {
             profilePhoto: ownerData.profile.photo_profile_url,
             firstName: ownerData.user.name,
             lastName: ownerData.user.last_name,
-            petPhoto: petData.pet.photo_url,
+            petPhoto: petPhoto,
             numberPhone: ownerData.profile.number_phone,
             ...post.toObject()
         };
@@ -304,4 +328,5 @@ module.exports = {
     getPostByUserId, 
     getPost,
     getPostById,
+    getPostsAll
 };
