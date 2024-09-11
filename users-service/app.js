@@ -12,7 +12,7 @@ const profileRoutes = require('./routes/profile-routes')
 const app = express();
 
 // Conexión a MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/bd_users', {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     autoIndex:true

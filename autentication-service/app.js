@@ -1,27 +1,26 @@
 // servicio-autenticacion/app.js
 const express = require('express');
-const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth-routes');
 const cors = require ('cors')
 
 const app = express();
 
 // Conexión a MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/bd_sesiones', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('Conexión exitosa a MongoDB'))
-.catch(error => console.error('Error al conectar a MongoDB:', error));
+
 
 app.use(express.json()); // Middleware para parsear JSON
 app.use(cors())
+// En cada servicio de autenticación
+app.get('/healthcheck', (req, res) => {
+    res.status(200).send('OK');
+});
+
 
 
 //Rutas user
 app.use('/api/v1/auth', authRoutes);
 
-const PORT = 6000;
-app.listen(PORT, () => {
+const PORT = 4000;
+app.listen(PORT,() => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

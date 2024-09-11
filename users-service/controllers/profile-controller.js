@@ -243,7 +243,7 @@ const getFollowerProfile = async (req, res) => {
         // Encuentra el perfil al que se quiere obtener los seguidores
         const profile = await Profile.findById(profileId);
 
-        console.log("Mostrando los seguidores de: "+ profile);
+
 
         if (!profile) {
             return res.status(404).json({ message: 'Profile not found' });
@@ -266,7 +266,6 @@ const getFollowingProfile = async (req, res) => {
         // Encuentra el perfil al que se quiere obtener los seguidores
         const profile = await Profile.findById(profileId);
 
-        console.log("Mostrando los usuarios que sigues: "+ profile);
 
         if (!profile) {
             return res.status(404).json({ message: 'Profile not found' });

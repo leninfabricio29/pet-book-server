@@ -1,20 +1,7 @@
-# Usa una imagen base de Node.js
-FROM node:20-slim
-
-# Establece el directorio de trabajo en el contenedor
-WORKDIR /usr/src/app
-
-# Copia los archivos package.json y package-lock.json (si existe)
+FROM node:18
+WORKDIR /app
 COPY package*.json ./
-
-# Instala las dependencias del proyecto
 RUN npm install
-
-# Copia el resto de los archivos del proyecto
 COPY . .
-
-# Expone el puerto 8080 en el contenedor
-EXPOSE 8050
-
-# Comando para ejecutar la aplicación
-CMD ["npm", "start"]
+EXPOSE 4000
+CMD ["node", "app.js"]

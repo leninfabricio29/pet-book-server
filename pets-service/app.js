@@ -9,7 +9,7 @@ const cors = require('cors');
 const app = express();
 
 // Conexión a MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/bd_pets', {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
@@ -23,6 +23,6 @@ app.use(cors()); // Conexión
 app.use('/api/v1/pets', petRoutes);
 
 const PORT = 6020;
-app.listen(PORT, () => {
+app.listen(PORT,() => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

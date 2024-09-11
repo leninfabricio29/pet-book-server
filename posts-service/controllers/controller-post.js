@@ -134,31 +134,44 @@ const createPost = async (req, res) => {
 
 
 
-const getPostByUserId = async (req, res) => {
-        try {
-            const ownerId = req.params.id;
-    
-            // Esperar a que se encuentren los posts del propietario
-            const posts = await Post.find({ owner: ownerId });
-    
-            // Obtener la mascota del propietario
-            const petResponse = await fetch(`http://localhost:3010/api/v1/pets/${posts.pet}`);
-            const petData = await petResponse.json();
-    
-            // Construir el objeto de respuesta con los posts y la mascota
-            const responseData = {
-                posts: posts,
-                pet: petData
-            };
-    
-            // Enviar el objeto de respuesta como JSON
-            res.status(200).json(responseData);
-    
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Ha ocurrido un error al procesar la solicitud.' });
-        }
-    };
+  const getPostByUserId = async (req, res) => {
+    try {
+        const ownerId = req.params.id;
+
+        // Esperar a que se encuentren los posts del propietario
+        const posts = await Post.find({ owner: ownerId });
+
+        // Enrich each post with pet data
+        const enrichedPosts = await Promise.all(
+            posts.map(async (post) => {
+                let petData = {};
+                let petPhoto = '';
+
+                if (post.type !== 'Avistamiento') {
+                    const petResponse = await fetch(`http://localhost:3010/api/v1/pets/${post.pet}`);
+                    if (!petResponse.ok) {
+                        throw new Error('Failed to fetch pet data');
+                    }
+                    petData = await petResponse.json();
+                    petPhoto = petData.pet.photo_url;
+                }
+
+                return {
+                    petPhoto: petPhoto,
+                    ...post.toObject() // Convert each individual post to a plain object
+                };
+            })
+        );
+
+        // Send the enriched posts to the client
+        res.json(enrichedPosts);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Ha ocurrido un error al procesar la solicitud.' });
+    }
+};
+  
 
 // Controlador para actualizar los detalles de una publicación existente
 const updatePost = async (req, res) => {
@@ -260,6 +273,18 @@ const getPostsAll = async (req, res) => {
     }
   };
 
+  const getPostsAllByUser = async (req, res) => {
+    try {
+      const ownerId = req.params.id;
+      const posts = await Post.findById(ownerId);
+      res.send(posts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      res.status(500).send('Error fetching posts');
+    }
+  };
+
+
 
 const getPostById = async (req, res) => {
     const postId = req.params.id;
@@ -321,6 +346,9 @@ const getPostById = async (req, res) => {
 
 
 
+
+
+
 module.exports = {
     createPost,
     updatePost,
@@ -328,5 +356,6 @@ module.exports = {
     getPostByUserId, 
     getPost,
     getPostById,
-    getPostsAll
+    getPostsAll,
+    getPostsAllByUser,
 };

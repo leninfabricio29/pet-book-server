@@ -67,12 +67,6 @@ const createPet = async (req, res) => {
     }
 };
 
-
-
-
-
-
-
 //Controlador para obtener una nueva mascota
 const getAllPets = async (req, res) => {
     try {

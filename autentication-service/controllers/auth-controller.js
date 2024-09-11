@@ -5,6 +5,8 @@ const twilio = require('twilio');
 
 
 
+
+
 exports.login = async (req, res) => {
     const { email, password } = req.body;
 
@@ -22,16 +24,23 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'La contraseña proporcionada es incorrecta.' });
         }
 
+        // Actualizar la última interacción del usuario
+        await axios.post(`http://localhost:3010/api/v1/users/${user._id}/updateInteraction`);
+
         // Si la autenticación es exitosa, genera un token JWT
         const token = jwt.sign({ userId: user._id }, 'fabricio29', { expiresIn: '1h' });
 
-        
-        res.status(200).json({ message: `¡Bienvenido, ${user.username}!`, token , user});
+        res.status(200).json({ message: `¡Bienvenido, ${user.username}!`, token, user });
     } catch (error) {
+        if (error.response && error.response.status === 404) {
+            return res.status(404).json({ message: 'No existe usuario registrado con este correo electrónico.' });
+        }
         console.error('Error de conexión con el servidor:', error.message);
         res.status(500).json({ message: 'Ha ocurrido un error al iniciar sesión.' });
     }
 };
+
+
 
 
 

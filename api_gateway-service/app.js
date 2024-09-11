@@ -17,68 +17,64 @@ app.use(limiter);
 
 // Configuración de balanceo de carga para microservicios
 const services = {
-    users: ['http://localhost:6010'],  
-    profiles: ['http://localhost:6010'],  // Única instancia
-    auth: ['http://localhost:6000'],   // Única instancia
-    posts: ['http://localhost:6030'],  // Única instancia
-    events: ['http://localhost:6030'], // Única instancia
-    forums: ['http://localhost:6030'], // Única instancia
-    comments: ['http://localhost:6030'], // Única instancia
-    reactions: ['http://localhost:6030'], // Única instancia
-    notifications: ['http://localhost:6030'], // Única instancia
-    pets: ['http://localhost:6020']  // Única instancia
+    users: ['http://localhost:6010'],
+    profiles: ['http://localhost:6010'],
+    auth: ['http://localhost:4000', 'http://localhost:4010', 'http://localhost:4020'],
+    posts: ['http://localhost:6030'],
+    events: ['http://localhost:6030'],
+    forums: ['http://localhost:6030'],
+    comments: ['http://localhost:6030'],
+    reactions: ['http://localhost:6030'],
+    notifications: ['http://localhost:6030'],
+    pets: ['http://localhost:6020']
 };
 
+// Índices de round-robin para los servicios
+const serviceIndices = {};
+
 const getNextServer = (service) => {
-    return services[service][0];
+    if (!services[service]) {
+        return null;
+    }
+    if (!serviceIndices[service]) {
+        serviceIndices[service] = 0;
+    }
+    const servers = services[service];
+    const index = serviceIndices[service];
+    const nextServer = servers[index];
+    serviceIndices[service] = (index + 1) % servers.length;
+    return nextServer;
+};
+
+// Función para manejar las redirecciones
+const handleRedirect = (service, req, res) => {
+    const target = getNextServer(service);
+    if (!target) {
+        console.error(`Servicio no encontrado: ${service}`);
+        res.status(404).json({ error: `Servicio ${service} no encontrado.` });
+        return;
+    }
+    console.log(`Redirigiendo a servicio ${service}: ${target}`);
+    apiProxy.web(req, res, { target }, (err) => {
+        if (err) {
+            console.error(`Error al redirigir a ${service}:`, err);
+            res.status(500).json({ error: `Error al conectar con el servicio ${service}.` });
+        }
+    });
 };
 
 // Rutas para los microservicios
-app.all('/api/v1/users/*', (req, res) => {
-    apiProxy.web(req, res, { target: getNextServer('users') });
+app.all('/api/v1/:service/*', (req, res) => {
+    const service = req.params.service;
+    handleRedirect(service, req, res);
 });
 
-app.all('/api/v1/profiles/*', (req, res) => {
-    apiProxy.web(req, res, { target: getNextServer('profiles') });
-});
-
-app.all('/api/v1/auth/*', (req, res) => {
-    apiProxy.web(req, res, { target: getNextServer('auth') });
-});
-
-// Rutas para los microservicios en el API Gateway
-app.all('/api/v1/posts/*', (req, res) => {
-    apiProxy.web(req, res, { target: getNextServer('posts') });
-});
-
-app.all('/api/v1/events/*', (req, res) => {
-    apiProxy.web(req, res, { target: getNextServer('events') });
-});
-
-app.all('/api/v1/forums/*', (req, res) => {
-    apiProxy.web(req, res, { target: getNextServer('forums') });
-});
-
-app.all('/api/v1/comments/*', (req, res) => {
-    apiProxy.web(req, res, { target: getNextServer('comments') });
-});
-
-app.all('/api/v1/reactions/*', (req, res) => {
-    apiProxy.web(req, res, { target: getNextServer('reactions') });
-});
-
-app.all('/api/v1/notifications/*', (req, res) => {
-    apiProxy.web(req, res, { target: getNextServer('notifications') });
-});
-
-app.all('/api/v1/pets/*', (req, res) => {
-    apiProxy.web(req, res, { target: getNextServer('pets') });
-});
-
-// Manejo de errores
+// Manejo de errores general
 apiProxy.on('error', (err, req, res) => {
     console.error('Error en el proxy:', err);
-    res.status(500).json({ error: 'Algo salió mal en el API Gateway.' });
+    if (!res.headersSent) {
+        res.status(500).json({ error: 'Algo salió mal en el API Gateway.' });
+    }
 });
 
 app.listen(3010, () => {

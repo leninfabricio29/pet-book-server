@@ -16,7 +16,7 @@ const cors = require('cors');
 const app = express();
 
 // Conexión a MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/bd_posts', {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
@@ -35,6 +35,6 @@ app.use('/api/v1/reactions', reactionRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 
 const PORT = 6030;
-app.listen(PORT, () => {
+app.listen(PORT,() => {
     console.log(`Servidor POSTS / EVENTOS / FOROS corriendo en el puerto ${PORT}`);
 });

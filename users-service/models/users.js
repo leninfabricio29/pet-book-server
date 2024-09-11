@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const Profile = require('./profile')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -38,8 +39,23 @@ const userSchema = new mongoose.Schema({
     status_profile: {
         type: Boolean,
         default: false
+    },
+    last_interaction: {
+        type: Date,
+        default: Date.now
     }
 });
+
+// Middleware para eliminar el perfil cuando se elimina un usuario
+userSchema.pre('findOneAndDelete', async function(next) {
+    const user = await this.model.findOne(this.getFilter());
+
+    // Eliminar el perfil asociado
+    await Profile.deleteOne({ user: user._id });
+
+    next();
+});
+
 // Método de instancia para actualizar la contraseña
 userSchema.methods.updatePassword = async function(newPassword) {
     const salt = await bcrypt.genSalt(10);
