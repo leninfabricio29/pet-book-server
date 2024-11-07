@@ -33,8 +33,8 @@ const eventSchema = new Schema({
     }],
     status: {
         type: String,
-        enum: ['pending', 'active', 'cancelled'],
-        default: 'pending'
+        enum: ['active', 'cancelled'],
+        default: 'active'
     },
     createdAt: {
         type: Date,
